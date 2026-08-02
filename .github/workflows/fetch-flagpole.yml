@@ -1,0 +1,37 @@
+name: Fetch flagpole workspace
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out target repository
+        uses: actions/checkout@v4
+        with:
+          repository: kva4991/flagpole
+          ref: main
+          path: flagpole
+          fetch-depth: 1
+
+      - name: Remove Git metadata and package source tree
+        shell: bash
+        run: |
+          rm -rf flagpole/.git
+          tar -czf flagpole-main.tar.gz flagpole
+          ls -lh flagpole-main.tar.gz
+
+      - name: Upload source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: flagpole-main-source
+          path: flagpole-main.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
